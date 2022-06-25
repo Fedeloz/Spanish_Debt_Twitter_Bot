@@ -55,12 +55,15 @@ def consultar_deuda(URL):
 
     return      data
 
-def tweet(text):
+def tweet(text, user_id):
     obj_now = datetime.now()
     print('Tweeting:\n------------------------------------\n' + text)
     print("Current date & time: ", obj_now)
     print('------------------------------------')
-    api.update_status(text)
+    if (user_id):
+        api.update_status(text, user_id)
+    else:
+        api.update_status(text)
 
 def retrieve_last_seen_id(file_name):
     f_read          = open(file_name, 'r')
@@ -90,34 +93,37 @@ def reply_to_tweets():
         word_2  = ADJETIVOS     [random.randrange(len(ADJETIVOS))]
         
         if '#insultame' in mention.full_text:
-            answer = '@' + mention.user.screen_name + ' ' + word_1 + ' ' + word_2 + ' te insulto'
+            answer = '@' + mention.user.screen_name + ' ' + word_1 + ' ' + word_2 # + ' te insulto'
             print('Found #insultame! Responding back...')
-            tweet(answer)
+            tweet(answer, mention.id)
 
         if '#deuda' in mention.full_text:
             data    = consultar_deuda(URL)
             ofi, ofi_rel, real, real_rel = data[0], data[3], data[1], data[4]
             answer = '@' + mention.user.screen_name + ' Aquí tienes 🇪🇸:\n\nDeuda oficial: ' + ofi + '€ (' + "%.2f" % ofi_rel + '%)\nDeuda real: ' + real + '€ (' + "%.2f" % real_rel + '%)'
             print('Found #deuda! Responding back...')
-            tweet(answer)
+            tweet(answer, mention.id)
 
 #--------------------------------------------------------------------#
 #                           MAIN LOOP                                #
 #--------------------------------------------------------------------#
 
-i = 1
+i = 0
 j = 1440 # 2h gap
 
 while 1:
-    # TWEET DEBT
-    if i % 17280 == 0: # 86400 secs / 5 secs per iteration
-        tweet(generar_texto(0))
-
-    # TWEET RANDOM FACT
-    if j % 17280 == 0:
-        tweet(generar_texto(random.randrange(1, 6)))
-
     reply_to_tweets()
     time.sleep(5)
-    i += 1
-    j += 1
+# while 1:
+#     # TWEET DEBT
+#     if i % 17280 == 0: # 86400 secs / 5 secs per iteration
+#         tweet(generar_texto(0), False)
+
+#     # TWEET RANDOM FACT
+#     if j % 17280 == 0:
+#         tweet(generar_texto(random.randrange(1, 6)), False)
+
+#     reply_to_tweets()
+#     time.sleep(5)
+#     i += 1
+#     j += 1
